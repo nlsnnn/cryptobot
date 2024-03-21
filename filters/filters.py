@@ -30,6 +30,11 @@ class ValidBalance(BaseFilter):
         return False
 
 
+class ValidID(BaseFilter):
+    async def __call__(self, message: Message):
+        return message.text.isdigit()
+
+
 class IsPrivate(BaseFilter):
     async def __call__(self, callback: CallbackQuery, session: AsyncSession):
         return (await orm_check_private_user(session, callback.from_user.id))
@@ -37,4 +42,4 @@ class IsPrivate(BaseFilter):
 
 class IsAdmin(BaseFilter):
     async def __call__(self, callback: CallbackQuery, admin_id: str) -> Any:
-        return int(admin_id) == callback.from_user.id
+        return int(admin_id) == int(callback.from_user.id)

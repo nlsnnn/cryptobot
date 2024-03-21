@@ -131,3 +131,21 @@ async def orm_get_number_users(
     query = func.count(User.id)
     result = await session.execute(query)
     return result.scalar()
+
+
+async def orm_get_id_users(
+        session: AsyncSession
+):
+    query = select(User.tg_id)
+    result = await session.execute(query)
+    return result.all()
+
+
+async def orm_set_balance(
+        session: AsyncSession,
+        tg_id: int,
+        amount: int
+):
+    query = (update(User).where(User.tg_id == tg_id).values(balance=amount))
+    await session.execute(query)
+    await session.commit()

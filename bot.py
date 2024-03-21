@@ -4,6 +4,7 @@ from aiogram import Bot, Dispatcher
 from handlers.user_handlers import user_router
 from handlers.other_handlers import other_router
 from handlers.private_handlers import private_router
+from handlers.admin_handlers import admin_router
 from config.config_data import Config, load_config
 from database.requests import async_main, async_session
 from middlewares.db import DataBaseSession
@@ -26,10 +27,11 @@ async def main():
     dp = Dispatcher()
 
     dp['address'] = config.tg_bot.crypto_address
-
+    dp['admin_id'] = config.tg_bot.admin_id
 
     dp.include_router(private_router)
     dp.include_router(user_router)
+    dp.include_router(admin_router)
     dp.include_router(other_router)
 
     dp.update.middleware(DataBaseSession(session_pool=async_session))
