@@ -28,7 +28,7 @@ def load_config(path: str):
         tg_bot=TgBot(
             token=env('BOT_TOKEN'),
             admin_id=env('ADMIN_ID'),
-            crypto_address=env('ADDRESS')
+            crypto_address=env('TRX_ADDRESS')
         ),
         db=DataBase(
             url=env('SQLALCHEMY_URL')
