@@ -24,6 +24,8 @@ async def main():
     bot = Bot(config.tg_bot.token, parse_mode='HTML')
     dp = Dispatcher()
 
+    dp['address'] = config.tg_bot.crypto_address
+
     dp.include_router(user_router)
     dp.include_router(other_router)
 

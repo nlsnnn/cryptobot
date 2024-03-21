@@ -40,19 +40,25 @@ async def orm_get_balance(
     return result.scalar()
 
 
+async def orm_update_balance(
+        session: AsyncSession,
+        tg_id: int,
+        amount: int
+):
+    query = (update(User).where(User.tg_id == tg_id).values(balance=User.balance + amount))
+    await session.execute(query)
+    await session.commit()
+
+
 async def orm_add_txid(
         session: AsyncSession,
-        txid: str
+        txid: str,
+        amount: int
 ):
-    session.add(txid=txid)
+    session.add(Hash(
+        txid=txid,
+        amount=amount))
     await session.commit()
-    # query = select(Hash).where(Hash.txid == txid)
-    # result = await session.execute(query)
-    # if result.first() is None:
-    #     session.add(
-    #         Hash(txid=txid)
-    #     )
-    #     await session.commit()
 
 
 async def orm_check_txid(
@@ -66,6 +72,18 @@ async def orm_check_txid(
     return False
 
 
+# PRIVATE
+
+async def orm_check_private_user(
+        session: AsyncSession,
+        tg_id: int
+):
+    query = select(User.private).where(User.tg_id == tg_id)
+    result = await session.execute(query)
+    return result.scalar()
+
+
+# ADMIN
 
 async def orm_get_number_users(
         session: AsyncSession

@@ -8,7 +8,9 @@ def check_txid(txid) -> bool:
     data = response.json()
     req_address = data['tokenTransferInfo']['to_address']
     req_amount = int(int(data['tokenTransferInfo']['amount_str']) / 1000000)
+    flag = data['confirmed']
 
-    if req_address == 'TAxpEcVN4a9iu3JYUJeb7VShmHayRLo2n8':
+    if flag:
+        if req_address == 'TAxpEcVN4a9iu3JYUJeb7VShmHayRLo2n8':
             return req_amount
     return False
