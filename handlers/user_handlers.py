@@ -4,12 +4,15 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.filters import CommandStart, StateFilter
 from aiogram.fsm.context import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from services.services import text_subscription
 from fsm.fsm import FSMTopUp, FSMPay
 from filters.filters import ValidHash, ValidBalance
 from lexicon.lexicon import LEXICON_RU
 from keyboards.inline_kb import get_markup
 from database.requests import (orm_add_user, orm_get_balance, orm_add_balance,
-                               orm_add_txid, orm_sub_balance, orm_set_private_user)
+                               orm_add_txid, orm_sub_balance, orm_set_private_user,
+                               orm_check_private_user, orm_check_date)
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +28,7 @@ async def start_cmd(message: Message, session: AsyncSession):
         name=user.full_name
     )
 
-    markup = get_markup(2, 'balance_btn', 'pay_btn')
+    markup = get_markup(2, 'balance_btn', 'pay_btn', 'profile_btn')
     await message.answer(LEXICON_RU['start'], reply_markup=markup)
     logger.info(f'Пользователь {message.from_user.username} запустил бота')
 
@@ -79,10 +82,10 @@ async def pay_start(callback: CallbackQuery, state: FSMContext):
     logger.info(f'Пользователь {callback.from_user.username} выбирает подписку')
 
 
+# Подтверждение оплаты
 @user_router.callback_query(StateFilter(FSMPay.choice_press))
-async def confirm_pay(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
+async def pay_confirm(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     n_data = callback.data
-    print(f'!!!!!!!!!!!!!!!! -{n_data}- !!!!!!!!!!!!!!!!!!')
     await state.update_data(pay_amount=LEXICON_RU[n_data][2])
     balance = await orm_get_balance(session, callback.from_user.id)
     markup = get_markup(2, 'confirm_btn', 'backward')
@@ -95,7 +98,7 @@ async def confirm_pay(callback: CallbackQuery, session: AsyncSession, state: FSM
     logger.info(f'Пользователь {callback.from_user.username} подтверждает оплату')
 
 
-
+# Успешная оплата
 @user_router.callback_query(StateFilter(FSMPay.confirm_press), F.data == 'confirm_btn', ValidBalance())
 async def pay_done(callback: CallbackQuery, session: AsyncSession, state: FSMContext, amount: int):
     await orm_sub_balance(session, callback.from_user.id, amount)
@@ -106,6 +109,7 @@ async def pay_done(callback: CallbackQuery, session: AsyncSession, state: FSMCon
     logger.info(f'Пользователь {callback.from_user.username} успешно оплатил подписку')
 
 
+# Недостаточно денег
 @user_router.callback_query(StateFilter(FSMPay.confirm_press), F.data == 'confirm_btn')
 async def pay_wrong(callback: CallbackQuery):
     markup = get_markup(1, 'backward')
@@ -113,8 +117,23 @@ async def pay_wrong(callback: CallbackQuery):
     logger.info(f'Пользователь {callback.from_user.username} не имеет достаточно денег для оплаты')
 
 
+@user_router.callback_query(F.data == 'profile_btn')
+async def profile_press(callback: CallbackQuery, session: AsyncSession):
+    balance = await orm_get_balance(session, callback.from_user.id)
+    flag = text_subscription(await orm_check_private_user(session, callback.from_user.id))
+    date = await orm_check_date(session, callback.from_user.id)
+    markup = get_markup(1, 'backward')
+    await callback.message.edit_text(LEXICON_RU['profile'].format(
+        user=callback.from_user.username,
+        balance=balance,
+        subscription=flag,
+        date=date
+    ), reply_markup=markup)
+    logger.info(f'Пользователь {callback.from_user.username} в меню профиля')
+
+
 @user_router.callback_query(F.data == 'backward')
 async def backward(callback: CallbackQuery):
-    markup = get_markup(2, 'balance_btn', 'pay_btn')
+    markup = get_markup(2, 'balance_btn', 'pay_btn', 'profile_btn')
     await callback.message.edit_text(LEXICON_RU['start'], reply_markup=markup)
     logger.info(f'Пользователь {callback.from_user.username} в главном меню')

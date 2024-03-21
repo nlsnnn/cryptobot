@@ -3,7 +3,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.filters import BaseFilter
 from aiogram.fsm.context import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
-from database.requests import orm_check_txid, orm_get_balance
+from database.requests import orm_check_txid, orm_get_balance, orm_check_private_user
 from services.txid_scrap import check_txid
 from lexicon.lexicon import LEXICON_RU
 
@@ -28,3 +28,13 @@ class ValidBalance(BaseFilter):
         if int(amount) <= int(balance):
             return {'amount': amount}
         return False
+
+
+class IsPrivate(BaseFilter):
+    async def __call__(self, callback: CallbackQuery, session: AsyncSession):
+        return (await orm_check_private_user(session, callback.from_user.id))
+
+
+class IsAdmin(BaseFilter):
+    async def __call__(self, callback: CallbackQuery, admin_id: str) -> Any:
+        return int(admin_id) == callback.from_user.id

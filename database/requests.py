@@ -61,6 +61,15 @@ async def orm_sub_balance(
     await session.commit()
 
 
+async def orm_check_date(
+        session: AsyncSession,
+        tg_id: int
+):
+    query = select(User.created).where(User.tg_id == tg_id)
+    result = await session.execute(query)
+    return result.scalar()
+
+
 # Hash
 
 async def orm_add_txid(
