@@ -19,5 +19,15 @@ LEXICON_RU: dict[str: str] = {
     'd14_btn': ['14 дней - 29$', '14 дней', '29'],
     'd30_btn': ['30 дней - 49$', '30 дней', '49'],
     'confirm_btn': 'Подтверждаю ✔',
-    'backward': '❌'
+    'backward': '❌',
+    # PRIVATE
+    'private_info': '<b>Все ресурсы для пользователей подписки</b>',
+    'private_btn': 'Подписка 🎫',
+    'private_channel_btn': 'Канал 👻',
+    'private_chat_btn': 'Чат ☁'
+}
+
+LINKS: dict[str: str] = {
+    'channel': 'https://t.me/+3dxbYNjg_rgxZjUy',
+    'chat': 'https://t.me/+Xb5iIIjnfhA4MTQy'
 }
