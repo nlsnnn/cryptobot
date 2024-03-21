@@ -134,7 +134,6 @@ async def mailing_start(message: Message, state: FSMContext, session: AsyncSessi
     receive_users, block_users = 0, 0
     for user in users:
         try:
-            # await message.bot.send_message()
             await message.bot.send_photo(user, photo=photo, caption=message.text)
             receive_users += 1
         except:
