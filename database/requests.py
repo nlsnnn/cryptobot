@@ -20,13 +20,14 @@ async def orm_add_user(
         session: AsyncSession,
         tg_id: int,
         name: str | None = None,
-        balance: int = 0
+        balance: int = 0,
+        private: bool = False
 ):
     query = select(User).where(User.tg_id == tg_id)
     result = await session.execute(query)
     if result.first() is None:
         session.add(
-            User(tg_id=tg_id, name=name, balance=balance)
+            User(tg_id=tg_id, name=name, balance=balance, private=private)
         )
         await session.commit()
 
@@ -40,7 +41,7 @@ async def orm_get_balance(
     return result.scalar()
 
 
-async def orm_update_balance(
+async def orm_add_balance(
         session: AsyncSession,
         tg_id: int,
         amount: int
@@ -49,6 +50,18 @@ async def orm_update_balance(
     await session.execute(query)
     await session.commit()
 
+
+async def orm_sub_balance(
+        session: AsyncSession,
+        tg_id: int,
+        amount: int
+):
+    query = (update(User).where(User.tg_id == tg_id).values(balance=User.balance - amount))
+    await session.execute(query)
+    await session.commit()
+
+
+# Hash
 
 async def orm_add_txid(
         session: AsyncSession,
@@ -73,6 +86,24 @@ async def orm_check_txid(
 
 
 # PRIVATE
+
+async def orm_set_private_user(
+        session: AsyncSession,
+        tg_id: int
+):
+    query = (update(User).where(User.tg_id == tg_id).values(private=True))
+    await session.execute(query)
+    await session.commit()
+
+
+async def orm_delete_private_user(
+        session: AsyncSession,
+        tg_id: int
+):
+    query = (update(User).where(User.tg_id == tg_id).values(private=False))
+    await session.execute(query)
+    await session.commit()
+
 
 async def orm_check_private_user(
         session: AsyncSession,
