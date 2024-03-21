@@ -34,6 +34,7 @@ LEXICON_RU: dict[str: str] = {
     'user_info_wrong': 'Неверный ID!',
     'set_balance_fill': '<b>Введите новый баланс</b>',
     'set_balance': '<b>Пользователю {user} установлен баланс {balance}$</b>',
+    'set_balance_alert': '<b>Администратор установил вам новый баланс!</b>',
     'mailing_fill': '<b>Выберите тип рассылки</b>',
     'mailing_photo': '<b>Отправьте фото</b>',
     'mailing_text': '<b>Введите текст для рассылки</b>',

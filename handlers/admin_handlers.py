@@ -78,6 +78,7 @@ async def set_balance(message: Message, state: FSMContext, session: AsyncSession
     await orm_set_balance(session, tg_id, message.text)
     markup = get_markup(1, 'backward_admin')
     await message.delete()
+    await message.bot.send_message(tg_id, LEXICON_RU['set_balance_alert'])
     await message.answer(LEXICON_RU['set_balance'].format(
         user=tg_id, balance=message.text
     ), reply_markup=markup)
