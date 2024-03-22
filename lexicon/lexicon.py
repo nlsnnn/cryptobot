@@ -27,7 +27,7 @@ LEXICON_RU: dict[str: str] = {
     'private_chat_btn': 'Чат ☁',
     # ADMIN
     'admin_start': 'Что интересует?',
-    'number_users': 'Количество пользователей: {users}',
+    'number_users': 'Количество пользователей: {num_users}\n\nСписок пользователей:\n{users}',
     'user_info_fill': 'Введите ID пользователя',
     'user_info': '<b>Профиль пользователя @{user}</b>\n\nВаш баланс: {balance}$\n'
                 'Подписка: {subscription}\n\n<i>Регистрация в боте: {date}</i>',

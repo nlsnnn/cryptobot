@@ -141,6 +141,14 @@ async def orm_get_id_users(
     return result.all()
 
 
+async def orm_get_users(
+        session: AsyncSession
+):
+    query = select(User.tg_id, User.name)
+    result = await session.execute(query)
+    return result.all()
+
+
 async def orm_set_balance(
         session: AsyncSession,
         tg_id: int,

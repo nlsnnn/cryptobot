@@ -14,8 +14,8 @@ from keyboards.inline_kb import get_markup
 
 from database.requests import (orm_check_date, orm_check_private_user,
                                orm_get_balance, orm_get_number_users,
-                               orm_set_balance, orm_get_id_users)
-from services.services import text_subscription
+                               orm_set_balance, orm_get_id_users, orm_get_users)
+from services.services import text_subscription, text_users
 
 
 admin_router = Router()
@@ -33,9 +33,11 @@ async def auth_admin(message: Message):
 
 @admin_router.callback_query(F.data == 'number_btn')
 async def number_users(callback: CallbackQuery, session: AsyncSession):
-    users = await orm_get_number_users(session)
+    num_users = await orm_get_number_users(session)
+    users_lst = await orm_get_users(session)
+    users = text_users(users_lst)
     markup = get_markup(1, 'backward_admin')
-    await callback.message.edit_text(LEXICON_RU['number_users'].format(users=users),
+    await callback.message.edit_text(LEXICON_RU['number_users'].format(num_users=num_users, users=users),
                                      reply_markup=markup)
 
 
