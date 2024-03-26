@@ -138,7 +138,8 @@ async def profile_press(callback: CallbackQuery, session: AsyncSession):
 
 
 @user_router.callback_query(F.data == 'backward')
-async def backward(callback: CallbackQuery):
+async def backward(callback: CallbackQuery, state: FSMContext):
     markup = get_markup(2, 'balance_btn', 'pay_btn', 'profile_btn')
     await callback.message.edit_text(LEXICON_RU['start'], reply_markup=markup)
+    await state.clear()
     logger.info(f'Пользователь {callback.from_user.username} в главном меню')

@@ -4,7 +4,6 @@ from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery, PhotoSize
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import default_state
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fsm.fsm import FSMUserInfo, FSMMailing
@@ -13,7 +12,7 @@ from filters.filters import IsAdmin, ValidID
 from keyboards.inline_kb import get_markup
 
 from database.requests import (orm_check_date, orm_check_private_user,
-                               orm_get_balance, orm_get_number_users,
+                               orm_get_balance, orm_get_days, orm_get_number_users,
                                orm_set_balance, orm_get_id_users, orm_get_users)
 from services.services import text_subscription, text_users
 
@@ -55,15 +54,17 @@ async def user_info(message: Message, state: FSMContext, session: AsyncSession):
     balance = await orm_get_balance(session, user_id)
     flag = text_subscription(await orm_check_private_user(session, user_id))
     date = await orm_check_date(session, user_id)
+    days = await orm_get_days(session, user_id)
     markup = get_markup(1, 'set_balance_btn', 'backward_admin')
     await message.delete()
     await message.answer(LEXICON_RU['profile'].format(
         user=user_id,
         balance=balance,
         subscription=flag,
+        days=days,
         date=date
     ), reply_markup=markup)
-    await state.set_state(default_state)
+    await state.clear()
 
 
 @admin_router.callback_query(F.data == 'set_balance_btn')
@@ -151,6 +152,7 @@ async def mailing_start(message: Message, state: FSMContext, session: AsyncSessi
 
 
 @admin_router.callback_query(F.data == 'backward_admin')
-async def backward(callback: CallbackQuery):
+async def backward(callback: CallbackQuery, state: FSMContext):
     markup = get_markup(2, 'number_btn', 'user_info_btn', 'mailing_btn')
     await callback.message.edit_text(LEXICON_RU['admin_start'], reply_markup=markup)
+    await state.clear()

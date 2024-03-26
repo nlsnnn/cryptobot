@@ -9,5 +9,5 @@ other_router = Router()
 @other_router.message()
 async def other_msg(message: Message):
     await message.delete()
-    markup = get_markup('backward')
+    markup = get_markup(1, 'backward')
     await message.answer(LEXICON_RU['other'], reply_markup=markup)
