@@ -130,6 +130,7 @@ async def mailing_start(message: Message, state: FSMContext, session: AsyncSessi
     if data:
         photo = data.get('photo_id')
     markup = get_markup(1, 'backward_admin')
+    user_markup = get_markup(1, 'backward')
     await message.delete()
     await message.answer(LEXICON_RU['mailing_start'])
     ids = await orm_get_id_users(session)
@@ -137,7 +138,8 @@ async def mailing_start(message: Message, state: FSMContext, session: AsyncSessi
     receive_users, block_users = 0, 0
     for user in users:
         try:
-            await message.bot.send_photo(user, photo=photo, caption=message.text)
+            await message.bot.send_photo(user, photo=photo,
+                                         caption=message.text, reply_markup=user_markup)
             receive_users += 1
         except:
             block_users += 1

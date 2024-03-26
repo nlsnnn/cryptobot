@@ -11,8 +11,8 @@ from filters.filters import ValidHash, ValidBalance
 from lexicon.lexicon import LEXICON_RU
 from keyboards.inline_kb import get_markup
 from database.requests import (orm_add_user, orm_get_balance, orm_add_balance,
-                               orm_add_txid, orm_sub_balance, orm_set_private_user,
-                               orm_check_private_user, orm_check_date)
+                               orm_add_txid, orm_get_days, orm_sub_balance,
+                               orm_check_private_user, orm_check_date, orm_set_private_user)
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +86,8 @@ async def pay_start(callback: CallbackQuery, state: FSMContext):
 @user_router.callback_query(StateFilter(FSMPay.choice_press))
 async def pay_confirm(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     n_data = callback.data
-    await state.update_data(pay_amount=LEXICON_RU[n_data][2])
+    await state.update_data(pay_amount=LEXICON_RU[n_data][2],
+                            days=LEXICON_RU[n_data][3])
     balance = await orm_get_balance(session, callback.from_user.id)
     markup = get_markup(2, 'confirm_btn', 'backward')
     await callback.message.edit_text(LEXICON_RU['confirm_pay'].format(
@@ -100,12 +101,14 @@ async def pay_confirm(callback: CallbackQuery, session: AsyncSession, state: FSM
 
 # Успешная оплата
 @user_router.callback_query(StateFilter(FSMPay.confirm_press), F.data == 'confirm_btn', ValidBalance())
-async def pay_done(callback: CallbackQuery, session: AsyncSession, state: FSMContext, amount: int):
+async def pay_done(callback: CallbackQuery, session: AsyncSession,
+                   state: FSMContext, amount: int, days: int):
     await orm_sub_balance(session, callback.from_user.id, amount)
-    await orm_set_private_user(session, callback.from_user.id)
+    await orm_set_private_user(session, callback.from_user.id, days=days)
     markup = get_markup(1, 'backward')
     await callback.message.edit_text(LEXICON_RU['pay_done'], reply_markup=markup)
     await state.clear()
+
     logger.info(f'Пользователь {callback.from_user.username} успешно оплатил подписку')
 
 
@@ -122,11 +125,13 @@ async def profile_press(callback: CallbackQuery, session: AsyncSession):
     balance = await orm_get_balance(session, callback.from_user.id)
     flag = text_subscription(await orm_check_private_user(session, callback.from_user.id))
     date = await orm_check_date(session, callback.from_user.id)
+    days = await orm_get_days(session, callback.from_user.id)
     markup = get_markup(1, 'backward')
     await callback.message.edit_text(LEXICON_RU['profile'].format(
         user=callback.from_user.username,
         balance=balance,
         subscription=flag,
+        days=days,
         date=date
     ), reply_markup=markup)
     logger.info(f'Пользователь {callback.from_user.username} в меню профиля')

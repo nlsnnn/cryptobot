@@ -15,6 +15,7 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(150), nullable=True)
     balance: Mapped[int] = mapped_column(SmallInteger)
     private: Mapped[bool] = mapped_column(Boolean)
+    days: Mapped[int] = mapped_column(SmallInteger)
 
 
 class Hash(Base):

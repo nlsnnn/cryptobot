@@ -98,9 +98,10 @@ async def orm_check_txid(
 
 async def orm_set_private_user(
         session: AsyncSession,
-        tg_id: int
+        tg_id: int,
+        days: int
 ):
-    query = (update(User).where(User.tg_id == tg_id).values(private=True))
+    query = (update(User).where(User.tg_id == tg_id).values(private=True, days=days))
     await session.execute(query)
     await session.commit()
 
@@ -109,7 +110,7 @@ async def orm_delete_private_user(
         session: AsyncSession,
         tg_id: int
 ):
-    query = (update(User).where(User.tg_id == tg_id).values(private=False))
+    query = (update(User).where(User.tg_id == tg_id).values(private=False, days=0))
     await session.execute(query)
     await session.commit()
 
@@ -119,6 +120,32 @@ async def orm_check_private_user(
         tg_id: int
 ):
     query = select(User.private).where(User.tg_id == tg_id)
+    result = await session.execute(query)
+    return result.scalar()
+
+
+async def orm_get_id_private_users(
+        session: AsyncSession
+):
+    query = select(User.tg_id).where(User.private == True)
+    result = await session.execute(query)
+    return result.all()
+
+
+async def orm_sub_day(
+        session: AsyncSession,
+        tg_id: int
+):
+    query = (update(User).where(User.tg_id == tg_id).values(days=User.days - 1))
+    await session.execute(query)
+    await session.commit()
+
+
+async def orm_get_days(
+        session: AsyncSession,
+        tg_id: int
+):
+    query = select(User.days).where(User.tg_id == tg_id)
     result = await session.execute(query)
     return result.scalar()
 
