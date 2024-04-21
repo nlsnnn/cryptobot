@@ -132,6 +132,14 @@ async def orm_get_id_private_users(
     return result.all()
 
 
+async def orm_get_id_expired_private_users(
+        session: AsyncSession
+):
+    query = select(User.tg_id).where(User.private == True, User.days <= 1)
+    result = await session.execute(query)
+    return result.all()
+
+
 async def orm_sub_day(
         session: AsyncSession,
         tg_id: int
