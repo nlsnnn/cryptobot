@@ -36,7 +36,11 @@ async def main():
 
     scheduler.add_job(remove_day_private,
                     'interval',
-                    hours=24,
+                    seconds=30,
+                    args=(async_session(),))
+    scheduler.add_job(remove_user_private,
+                    'interval',
+                    seconds=30,
                     args=(async_session(),))
     scheduler.add_job(remove_user_private,
                     'interval',
