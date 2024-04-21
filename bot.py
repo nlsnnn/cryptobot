@@ -10,7 +10,7 @@ from handlers.admin_handlers import admin_router
 from config.config_data import Config, load_config
 from database.requests import async_main, async_session
 from middlewares.db import DataBaseSession
-from services.services import remove_day_private
+from services.services import remove_day_private, remove_user_private
 
 
 logger = logging.getLogger(__name__)
@@ -35,6 +35,10 @@ async def main():
     dp['admin_id'] = config.tg_bot.admin_id
 
     scheduler.add_job(remove_day_private,
+                    'interval',
+                    hours=24,
+                    args=(async_session(),))
+    scheduler.add_job(remove_user_private,
                     'interval',
                     hours=24,
                     args=(async_session(),))
